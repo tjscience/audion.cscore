@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace Audion.WaveformSample
+namespace Audion.Sample
 {
     /// <summary>
     /// Interaction logic for App.xaml

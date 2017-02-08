@@ -1,9 +1,9 @@
-﻿<Window x:Class="Audion.WaveformSample.MainWindow"
+﻿<Window x:Class="Audion.Sample.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Audion.WaveformSample"
+        xmlns:local="clr-namespace:Audion.Sample"
         xmlns:audion="clr-namespace:Audion.Visualization;assembly=Audion"
         mc:Ignorable="d" Background="#FF000000"
         Title="Audion Sample" Height="300" Width="500">

@@ -3,7 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 
-namespace Audion.WaveformSample
+namespace Audion.Sample
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
