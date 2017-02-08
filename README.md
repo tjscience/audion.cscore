@@ -17,6 +17,26 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 * Time Clock (Counters)
 * and more tba...
 
+### Source
+
+The Source class in audion makes it simple to load media and start playing with it. Every visualization simply subscribes to a Source. It is common to have one Source instance powering multiple different visualizations. Here is a simple example of loading a media file and playing it.
+
+    var source = new Source();
+    
+    // Open a file dialog to choose a media file
+    OpenFileDialog openFileDialog = new OpenFileDialog
+    {
+        Filter = Audion.Source.SupportedFiles
+    };
+        
+    // Load the media file into the source
+    if (openFileDialog.ShowDialog() == true)
+    {
+        source.Load(openFileDialog.FileName);
+    }
+    
+    source.Play();
+    
 ### Waveform
 
 ![waveform](https://cloud.githubusercontent.com/assets/3706870/22753981/f62a8342-ee0b-11e6-8a75-adb744b969ed.png)
