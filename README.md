@@ -1,6 +1,5 @@
-# Audion
+# audion
 An audio visualization and processing framework for WPF
-
 Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .NET Audio Library
 
 ### Included in Audion (so far):
@@ -21,21 +20,23 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 
 The Source class in audion makes it simple to load media and start playing with it. Every visualization simply subscribes to a Source. It is common to have one Source instance powering multiple different visualizations. Here is a simple example of loading a media file and playing it.
 
-    var source = new Source();
+```C#
+var source = new Source();
     
-    // Open a file dialog to choose a media file
-    OpenFileDialog openFileDialog = new OpenFileDialog
-    {
-        Filter = Audion.Source.SupportedFiles
-    };
+// Open a file dialog to choose a media file
+OpenFileDialog openFileDialog = new OpenFileDialog
+{
+    Filter = Audion.Source.SupportedFiles
+};
         
-    // Load the media file into the source
-    if (openFileDialog.ShowDialog() == true)
-    {
-        source.Load(openFileDialog.FileName);
-    }
+// Load the media file into the source
+if (openFileDialog.ShowDialog() == true)
+{
+    source.Load(openFileDialog.FileName);
+}
     
-    source.Play();
+source.Play();
+```    
     
 ### Waveform
 
@@ -43,17 +44,21 @@ The Source class in audion makes it simple to load media and start playing with 
 
 #### XAML
 
-    <audion:Waveform Name="waveform" 
-                     Resolution="2048"
-                     LeftBrush="LightBlue"                     
-                     LeftStroke="Transparent"
-                     LeftStrokeThickness="0"
-                     CenterLineBrush="White"/>
+```XML
+<audion:Waveform Name="waveform" 
+                 Resolution="2048"
+                 LeftBrush="LightBlue"                     
+                 LeftStroke="Transparent"
+                 LeftStrokeThickness="0"
+                 CenterLineBrush="White"/>
+```
 
 #### Code
 
-    var _source = new Source();
-    waveform.Source = _source;
+```C#
+var _source = new Source();
+waveform.Source = _source;
+```
 
 ### Timeline
 
@@ -61,19 +66,23 @@ The Source class in audion makes it simple to load media and start playing with 
 
 #### XAML
 
-    <audion:Timeline Name="timeline" 
-                     FontSize="12" 
-                     ProgressBrush="#9900C3FF"
-                     Position="{Binding TrackPosition}"
-                     TickBrush="Silver"
-                     TimeBrush="Silver"
-                     ProgressLineBrush="White"
-                     ProgressBrush="#772200EE"/>
+```XML
+<audion:Timeline Name="timeline" 
+                 FontSize="12" 
+                 ProgressBrush="#9900C3FF"
+                 Position="{Binding TrackPosition}"
+                 TickBrush="Silver"
+                 TimeBrush="Silver"
+                 ProgressLineBrush="White"
+                 ProgressBrush="#772200EE"/>
+```
 
 #### Code
 
-    var _source = new Source();
-    timeline.Source = _source;
+```C#
+var _source = new Source();
+timeline.Source = _source;
+```
     
 ### Spectrum Analyzer
 
@@ -81,14 +90,19 @@ The Source class in audion makes it simple to load media and start playing with 
 
 #### XAML
 
-    <audion:SpectrumAnalyzer Name="spectrum" 
-                             SpectrumScalingStrategy="Decibel"
-                             FrequencyBarCount="100" 
-                             FrequencyBarSpacing="2" 
-                             FrequencyBarBrush="{StaticResource BarBrush}" />
+```XML
+<audion:SpectrumAnalyzer Name="spectrum" 
+                         SpectrumScalingStrategy="Decibel"
+                         FrequencyBarCount="100" 
+                         FrequencyBarSpacing="2" 
+                         FrequencyBarBrush="{StaticResource BarBrush}" />
+```
 
 #### Code
 
-    var _source = new Source();
-    spectrum.Source = _source;
+```C#
+var _source = new Source();
+spectrum.Source = _source;
+```
+
     
