@@ -4,9 +4,55 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Audion.WaveformSample"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        xmlns:audion="clr-namespace:Audion.Visualization;assembly=Audion"
+        mc:Ignorable="d" Background="#FF000000"
+        Title="Audion Sample" Height="300" Width="500">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="BarBrush" StartPoint=".5,0" EndPoint="0.5, 1">
+            <GradientStop Color="OrangeRed" Offset=".0" />
+            <GradientStop Color="Orange" Offset=".05" />
+            <GradientStop Color="Yellow" Offset=".1" />
+            <GradientStop Color="GreenYellow" Offset=".2" />
+        </LinearGradientBrush>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel LastChildFill="False">
+            <Button Click="Load">
+                Load
+            </Button>
+            <Button Click="Play">
+                Play
+            </Button>
+            <Button Click="Pause">
+                Pause
+            </Button>
+            <Button Click="Resume">
+                Resume
+            </Button>
+            <Button Click="Stop">
+                Stop
+            </Button>
+            <Button Click="FastForward">
+                >
+            </Button>
+        </DockPanel>
+
+        <audion:Waveform Name="waveform" Resolution="2048" Grid.Row="1" />
+
+        <audion:Timeline Grid.Row="1" Name="timeline" FontFamily="pack://application:,,,/Resources/#digital-7" FontSize="12"
+                                ProgressBrush="#9900C3FF" />
+
+        <audion:SpectrumAnalyzer Grid.Row="1" Name="spectrum" SpectrumScalingStrategy="Decibel"
+                                 FrequencyBarCount="100" FrequencyBarSpacing="2" FrequencyBarBrush="{StaticResource BarBrush}"
+                                 FrequencyBarBorderBrush="#AAFFFFFF" />
+
     </Grid>
 </Window>

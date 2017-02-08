@@ -89,6 +89,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Resource Include="Resources\digital-7.ttf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Audion\Audion.csproj">
