@@ -23,7 +23,12 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 
 #### XAML
 
-    <audion:Waveform Name="waveform" Resolution="2048" />
+    <audion:Waveform Name="waveform" 
+                     Resolution="2048"
+                     LeftBrush="LightBlue"                     
+                     LeftStroke="Transparent"
+                     LeftStrokeThickness="0"
+                     CenterLineBrush="White"/>
 
 #### Code
 
@@ -36,7 +41,14 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 
 #### XAML
 
-    <audion:Timeline Name="timeline" FontSize="12" ProgressBrush="#9900C3FF" />
+    <audion:Timeline Name="timeline" 
+                     FontSize="12" 
+                     ProgressBrush="#9900C3FF"
+                     Position="{Binding TrackPosition}"
+                     TickBrush="Silver"
+                     TimeBrush="Silver"
+                     ProgressLineBrush="White"
+                     ProgressBrush="#772200EE"/>
 
 #### Code
 
@@ -49,8 +61,11 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 
 #### XAML
 
-    <audion:SpectrumAnalyzer Name="spectrum" SpectrumScalingStrategy="Decibel"
-                             FrequencyBarCount="100" FrequencyBarSpacing="2" FrequencyBarBrush="{StaticResource BarBrush}" />
+    <audion:SpectrumAnalyzer Name="spectrum" 
+                             SpectrumScalingStrategy="Decibel"
+                             FrequencyBarCount="100" 
+                             FrequencyBarSpacing="2" 
+                             FrequencyBarBrush="{StaticResource BarBrush}" />
 
 #### Code
 
