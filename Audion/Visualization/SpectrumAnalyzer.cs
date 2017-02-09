@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Audion.Visualization
 {
@@ -15,6 +16,7 @@ namespace Audion.Visualization
 
         // visual elements
         private Grid spectrumGrid;
+        private Border[] bars;
 
         private const int ScaleFactorLinear = 9;
         protected const int ScaleFactorSqr = 2;
@@ -218,6 +220,8 @@ namespace Audion.Visualization
             {
                 FrequencyBarCount = 100;
             }
+
+            CreateBars();
         }
 
         /// <summary>
@@ -537,12 +541,14 @@ namespace Audion.Visualization
 
         #endregion
 
-
         #endregion
 
         static SpectrumAnalyzer()
         {
-            SpectrumAnalyzer.DefaultStyleKeyProperty.OverrideMetadata(typeof(SpectrumAnalyzer), new FrameworkPropertyMetadata(typeof(SpectrumAnalyzer)));
+            SpectrumAnalyzer.DefaultStyleKeyProperty
+                .OverrideMetadata(typeof(SpectrumAnalyzer), new FrameworkPropertyMetadata(typeof(SpectrumAnalyzer)));
+
+            Application.SetFramerate();
         }
 
         #region Overrides
@@ -552,7 +558,9 @@ namespace Audion.Visualization
             base.OnApplyTemplate();
 
             spectrumGrid = GetTemplateChild("PART_Spectrum") as Grid;
+            spectrumGrid.CacheMode = new BitmapCache();
 
+            CreateBars();
             UpdateFrequencyMapping();
         }
 
@@ -567,6 +575,27 @@ namespace Audion.Visualization
         }
 
         #endregion
+
+        private void CreateBars()
+        {
+            if (spectrumGrid != null)
+            {
+                // Let's try to make this use less CPU by reusing the spectrum bars!
+                bars = new Border[FrequencyBarCount];
+
+                for (var i = 0; i < bars.Length; i++)
+                {
+                    bars[i] = new Border();
+                }
+
+                spectrumGrid.Children.Clear();
+
+                for (var i = 0; i < bars.Length; i++)
+                {
+                    spectrumGrid.Children.Add(bars[i]);
+                }
+            }
+        }
 
         private void UpdateFrequencyMapping()
         {
@@ -653,30 +682,35 @@ namespace Audion.Visualization
 
             Dispatcher.BeginInvoke((Action)delegate
             {
-                spectrumGrid.Children.Clear();
                 var width = this.RenderSize.Width;
                 var height = this.RenderSize.Height;
                 var barSpacing = width / FrequencyBarCount;
                 var barWidth = barSpacing - FrequencyBarSpacing;
+
+                // freeze brushes
+                var borderBrush = FrequencyBarBorderBrush.Clone();
+                var barBrush = FrequencyBarBrush.Clone();
+                borderBrush.Freeze();
+                barBrush.Freeze();
 
                 if (barWidth < .5)
                     barWidth = .5;
 
                 for (var i = 0; i < FrequencyBarCount; i++)
                 {
-                    var b = new Border();
+                    //var b = new Border();
+                    var b = bars[i];
                     b.Width = barWidth;
-                    b.BorderBrush = FrequencyBarBorderBrush;
+                    b.BorderBrush = borderBrush;
                     b.CornerRadius = FrequencyBarCornerRadius;
                     b.BorderThickness = FrequencyBarBorderThickness;
                     b.Height = (dataPoints[i] / 100) * height;
                     b.HorizontalAlignment = HorizontalAlignment.Left;
                     b.VerticalAlignment = VerticalAlignment.Bottom;
                     b.Margin = new Thickness(i * barSpacing, 0, 0, 0);
-                    b.Background = FrequencyBarBrush;
-                    spectrumGrid.Children.Add(b);
+                    b.Background = barBrush;
                 }
-            });
+            }, DispatcherPriority.ApplicationIdle);
         }
 
         public enum ScalingStrategy

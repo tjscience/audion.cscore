@@ -204,7 +204,9 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="LeftBrush"/></param>
         protected virtual void OnLeftBrushChanged(Brush oldValue, Brush newValue)
         {
-            leftPath.Fill = newValue;
+            var frozen = newValue.Clone();
+            frozen.Freeze();
+            leftPath.Fill = frozen;
             UpdateWaveform();
         }
 
@@ -265,7 +267,9 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="RightBrush"/></param>
         protected virtual void OnRightBrushChanged(Brush oldValue, Brush newValue)
         {
-            rightPath.Fill = newValue;
+            var frozen = newValue.Clone();
+            frozen.Freeze();
+            rightPath.Fill = frozen;
             UpdateWaveform();
         }
 
@@ -326,7 +330,10 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="LeftStroke"/></param>
         protected virtual void OnLeftStrokeChanged(Brush oldValue, Brush newValue)
         {
-            leftPath.Stroke = newValue;
+            var frozen = newValue.Clone();
+            frozen.Freeze();
+            leftPath.Stroke = frozen;
+            UpdateWaveform();
         }
 
         /// <summary>
@@ -386,7 +393,10 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="RightStroke"/></param>
         protected virtual void OnRightStrokeChanged(Brush oldValue, Brush newValue)
         {
-            rightPath.Stroke = newValue;
+            var frozen = newValue.Clone();
+            frozen.Freeze();
+            rightPath.Stroke = frozen;
+            UpdateWaveform();
         }
 
         /// <summary>
@@ -566,7 +576,9 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="CenterLineBrush"/></param>
         protected virtual void OnCenterLineBrushChanged(Brush oldValue, Brush newValue)
         {
-            centerLine.Stroke = newValue;
+            var frozen = newValue.Clone();
+            frozen.Freeze();
+            centerLine.Stroke = frozen;
             UpdateWaveform();
         }
 
@@ -592,6 +604,8 @@ namespace Audion.Visualization
         static Waveform()
         {
             Waveform.DefaultStyleKeyProperty.OverrideMetadata(typeof(Waveform), new FrameworkPropertyMetadata(typeof(Waveform)));
+
+            Application.SetFramerate();
         }
 
         #region Overrides

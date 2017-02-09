@@ -422,10 +422,11 @@ namespace Audion.Visualization
 
         #endregion
 
-
         static Timeline()
         {
             Timeline.DefaultStyleKeyProperty.OverrideMetadata(typeof(Timeline), new FrameworkPropertyMetadata(typeof(Timeline)));
+
+            Application.SetFramerate();
         }
 
         #region Overrides
@@ -438,6 +439,7 @@ namespace Audion.Visualization
             controlContainer = GetTemplateChild("PART_ControlContainer") as Grid;
             lengthGrid = GetTemplateChild("PART_Length") as Grid;
             progressLine = GetTemplateChild("PART_ProgressLine") as Border;
+            timelineGrid.CacheMode = new BitmapCache();
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
@@ -458,9 +460,15 @@ namespace Audion.Visualization
 
             lengthGrid.Children.Clear();
 
+            // freeze brushes
+            var tickBrush = TickBrush.Clone();
+            var timeBrush = TimeBrush.Clone();
+            tickBrush.Freeze();
+            timeBrush.Freeze();
+
             // Draw the bottom border
             var bottomBorder = new Border();
-            bottomBorder.Background = TickBrush;
+            bottomBorder.Background = tickBrush;
             bottomBorder.Height = 1;
             bottomBorder.VerticalAlignment = VerticalAlignment.Bottom;
             bottomBorder.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -490,7 +498,7 @@ namespace Audion.Visualization
                     tick.Height = 7;
                     tick.VerticalAlignment = VerticalAlignment.Bottom;
                     tick.HorizontalAlignment = HorizontalAlignment.Left;
-                    tick.Background = TickBrush;
+                    tick.Background = tickBrush;
                     tick.Margin = new Thickness(x, 0, 0, 0);
                     lengthGrid.Children.Add(tick);
                 }
@@ -501,7 +509,7 @@ namespace Audion.Visualization
                     tick.Width = 1;
                     tick.VerticalAlignment = VerticalAlignment.Stretch;
                     tick.HorizontalAlignment = HorizontalAlignment.Left;
-                    tick.Background = TickBrush;
+                    tick.Background = tickBrush;
                     tick.Margin = new Thickness(x, 0, 0, 0);
                     lengthGrid.Children.Add(tick);
 
@@ -509,7 +517,7 @@ namespace Audion.Visualization
                     var time = new TextBlock();
                     time.VerticalAlignment = VerticalAlignment.Bottom;
                     time.HorizontalAlignment = HorizontalAlignment.Left;
-                    time.Foreground = TimeBrush;
+                    time.Foreground = timeBrush;
                     var ts = TimeSpan.FromSeconds(interval);
                     time.Text = ts.TotalHours >= 1 ? ts.ToString(@"h\:mm\:ss") : ts.ToString(@"mm\:ss");
                     time.Margin = new Thickness(x + 5, 0, 0, 7);
