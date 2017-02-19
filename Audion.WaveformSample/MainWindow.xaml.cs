@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Windows;
-using System.Windows.Media;
 
 namespace Audion.Sample
 {
@@ -23,6 +22,7 @@ namespace Audion.Sample
             // set the source for the controls
             timeline.Source = _source;
             waveform.Source = _source;
+            dynamicWaveform.Source = _source;
             spectrum.Source = _source;
         }
 

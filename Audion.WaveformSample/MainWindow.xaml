@@ -7,24 +7,16 @@
         xmlns:audion="clr-namespace:Audion.Visualization;assembly=Audion"
         mc:Ignorable="d" Background="#FF000000"
         Title="Audion Sample" Height="300" Width="500">
-    <Window.Resources>
-        <LinearGradientBrush x:Key="BarBrush" StartPoint=".5,0" EndPoint="0.5, 1">
-            <GradientStop Color="OrangeRed" Offset=".0" />
-            <GradientStop Color="Orange" Offset=".05" />
-            <GradientStop Color="Yellow" Offset=".1" />
-            <GradientStop Color="GreenYellow" Offset=".2" />
-        </LinearGradientBrush>
-    </Window.Resources>
     <Grid Margin="10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <DockPanel LastChildFill="False">
+        <DockPanel LastChildFill="False" Grid.ColumnSpan="2">
             <Button Click="Load">
                 Load
             </Button>
@@ -45,13 +37,15 @@
             </Button>
         </DockPanel>
 
-        <audion:Waveform Name="waveform" Resolution="2048" Grid.Row="1" />
+        <audion:Timeline Height="30" Grid.Row="1" Name="timeline" FontFamily="pack://application:,,,/Resources/#digital-7" FontSize="12"
+                             ProgressBrush="#9900C3FF" />
 
-        <audion:Timeline Grid.Row="1" Name="timeline" FontFamily="pack://application:,,,/Resources/#digital-7" FontSize="12"
-                                ProgressBrush="#9900C3FF" />
+        <audion:Waveform Name="waveform" Grid.Row="2" />
 
-        <audion:SpectrumAnalyzer Grid.Row="1" Name="spectrum" SpectrumScalingStrategy="Decibel"
-                                 FrequencyBarCount="100" FrequencyBarSpacing="2" FrequencyBarBrush="{StaticResource BarBrush}"
+        <audion:DynamicWaveform Name="dynamicWaveform" Grid.Row="3" LeftBrush="Red" RightBrush="Blue" />
+
+        <audion:SpectrumAnalyzer Grid.Row="4" Name="spectrum" SpectrumScalingStrategy="Decibel"
+                                 FrequencyBarCount="100" FrequencyBarSpacing="2" FrequencyBarBrush="#FF39FF14"
                                  FrequencyBarBorderBrush="#AAFFFFFF" />
 
     </Grid>

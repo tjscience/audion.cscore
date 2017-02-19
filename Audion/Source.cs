@@ -3,8 +3,6 @@ using CSCore.DSP;
 using CSCore.SoundOut;
 using CSCore.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +12,7 @@ namespace Audion
     {
         private string _filename;
         private IWaveSource _waveSource;
+        private ISampleSource _sampleSource;
         private ISoundOut _soundOut;
         public BasicSpectrumProvider SpectrumProvider;
 
@@ -21,18 +20,13 @@ namespace Audion
         protected const double MaxDbValue = 0;
         protected const double DbScale = (MaxDbValue - MinDbValue);
         private int[] _spectrumIndexMax = new int[100];
-        private int _maxFftIndex = 4096 / 2 - 1;
-        private int _maximumFrequency = 20000;
-        private int _maximumFrequencyIndex;
-        private int _minimumFrequency = 20; //Default spectrum from 20Hz to 20kHz
-        private int _minimumFrequencyIndex;
-        private int SpectrumResolution = 50;
+        //private float[] _samples;
 
-
-        //private ISampleSource _sampleSource;
         private Timer _sourceTimer;
         private TimeSpan cachedPosition = TimeSpan.Zero;
         private PlaybackState cachedPlaybackState = PlaybackState.Stopped;
+
+        //private float[] _samples;
 
         private float[] waveformData;
         public float[] WaveformData
@@ -65,10 +59,22 @@ namespace Audion
         {
             get { return _waveSource == null ? TimeSpan.Zero : _waveSource.GetLength(); }
         }
+
+        public long SampleLength
+        {
+            get { return _sampleSource == null ? 0L : _sampleSource.Length; }
+        }
+
+        public int BytesPerSecond
+        {
+            get { return _sampleSource == null ? 0 : (_sampleSource.WaveFormat.Channels * _sampleSource.WaveFormat.SampleRate); }
+        }
+
         public TimeSpan Position
         {
             get { return _waveSource == null ? TimeSpan.Zero : _waveSource.GetPosition(); }
         }
+
         public PlaybackState PlaybackState
         {
             get { return _soundOut == null ? PlaybackState.Stopped : _soundOut.PlaybackState; }
@@ -101,6 +107,12 @@ namespace Audion
             {
                 _soundOut.Dispose();
                 _soundOut = null;
+            }
+
+            if (_sampleSource != null)
+            {
+                _sampleSource.Dispose();
+                _sampleSource = null;
             }
         }
 
@@ -157,56 +169,58 @@ namespace Audion
             }
         }
 
+        private float GetPeak(float[] values)
+        {
+            float peak = 0;
+            var length = values.Length;
+
+            for (var i = 0; i < length; i++)
+            {
+                var value = Math.Abs(values[i]);
+
+                if (peak < value)
+                {
+                    peak = value;
+                }
+            }
+
+            return peak;
+        }
+
         #endregion
 
         #region Public Methods
 
         /// <summary>
-        /// Asynchronously fetched data from the WaveSource.
+        /// Asynchronously fetched data from an isolated SampleSource.
         /// </summary>
         public void GetData(int resolution = 2048)
         {
             Task.Factory.StartNew(() =>
             {
-                if (_waveSource == null)
-                    throw new ArgumentNullException("waveSource");
-
-                var waveSource = CSCore.Codecs.CodecFactory.Instance.GetCodec(_filename);
-                var sampleSource = waveSource.ToSampleSource();
-
-                var channels = sampleSource.WaveFormat.Channels;
-                double waveformResolution = Math.Pow(2, resolution);
-                var blockSize = sampleSource.Length / resolution;
+                var _source = CSCore.Codecs.CodecFactory.Instance.GetCodec(_filename).ToSampleSource();
+                var blockSize = _sampleSource.Length / resolution;
                 var buffer = new float[blockSize];
-                var l = sampleSource.Length / blockSize;
+                var l = _sampleSource.Length / blockSize;
 
                 if (l % 2 != 0)
                 {
                     l++;
                 }
 
-                int sleep = ((int)l / 1000);
-
                 waveformData = new float[l];
                 var waveformDataCount = 0;
-
                 var flag = true;
+
                 while (flag)
                 {
                     var samplesToRead = buffer.Length;
-                    var read = sampleSource.Read(buffer, 0, samplesToRead);
-                    var pos = buffer.Where(x => x > 0).ToArray();
-                    var neg = buffer.Where(x => x < 0).ToArray();
-                    var peakPos = pos.Length > 0 ? pos.Max() : 0;
-                    //var peakNeg = neg.Length > 0 ? Math.Abs(neg.Min()) : 0;
-                    //var peak = peakPos > peakNeg ? peakPos : peakNeg;
-                    waveformData[waveformDataCount] = peakPos;
+                    var read = _source.Read(buffer, 0, samplesToRead);
+                    waveformData[waveformDataCount] = GetPeak(buffer);
 
                     if (waveformDataCount % 2 != 0)
                     {
-                        //RaisePropertyChangedEvent()
                         RaiseSourcePropertyChangedEvent(Property.WaveformData, waveformData);
-                        Thread.Sleep(sleep);
                     }
 
                     waveformDataCount++;                    
@@ -218,12 +232,48 @@ namespace Audion
                         flag = false;
                 }
 
-                waveSource.Position = 0;
-                ((IAudioSource)waveSource).Dispose();
-                waveSource.Dispose();
-                //RaiseDataProcessedEvent();
+                _source.Dispose();
+                _source = null;
+
                 RaiseSourceEvent(Event.WaveformDataCompleted);
             });
+        }
+
+        /// <summary>
+        /// Fetch data dynamically from the SampleSource.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="length"></param>
+        /// <param name="resolution"></param>
+        /// <returns></returns>
+        public float[] GetDataRange(int start, int length, int resolution = 2048)
+        {
+            if (start + length > _sampleSource.Length)
+                return null;
+
+            if (resolution <= 0)
+                return null;
+
+            if (length < resolution)
+                resolution = length;
+
+            var blockSize = length / resolution;
+            var samples = new float[resolution];
+
+            _sampleSource.Position = start;
+            var buffer = new float[blockSize];
+
+            for (var i = 0; i < resolution; i++)
+            {
+                int read = _sampleSource.Read(buffer, 0, blockSize);
+
+                if (read < buffer.Length)
+                    Array.Clear(samples, read, buffer.Length - read);
+
+                samples[i] = GetPeak(buffer);
+            }
+
+            return samples;
         }
 
         public void Load(string filename)
@@ -234,7 +284,6 @@ namespace Audion
                 .ToSampleSource()
                 .ToMono()
                 .ToWaveSource();
-            //RaiseSourceLoadedEvent();
             
             SpectrumProvider = new BasicSpectrumProvider(_waveSource.WaveFormat.Channels,
                 _waveSource.WaveFormat.SampleRate, 
@@ -246,6 +295,10 @@ namespace Audion
             notificationSource.SingleBlockRead += (s, a) => SpectrumProvider.Add(a.Left, a.Right);
 
             _waveSource = notificationSource.ToWaveSource(16);
+
+            // Load the sample source
+            var ws = CSCore.Codecs.CodecFactory.Instance.GetCodec(_filename);
+            _sampleSource = ws.ToSampleSource();
 
             RaiseSourceEvent(Event.Loaded);
 

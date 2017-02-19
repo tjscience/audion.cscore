@@ -7,7 +7,7 @@ using System.Windows.Shapes;
 namespace Audion.Visualization
 {
     [TemplatePart(Name = "PART_Waveform", Type = typeof(Canvas))]
-    public class Waveform : Control
+    public class DynamicWaveform : Control
     {
         private Source _source;
 
@@ -15,30 +15,36 @@ namespace Audion.Visualization
         private readonly Path leftPath = new Path();
         private readonly Path rightPath = new Path();
         private readonly Line centerLine = new Line();
+        private Border progressLine;
+
+        float[] wavelengthDataSnapshot;
+        double cachedSeconds = 0;
+        double cachedPosition = 0;
+        double byteToResolutionRatio;
 
         #region Dependency Properties
 
         #region Source Property
 
         public static readonly DependencyProperty SourceProperty = DependencyProperty.Register("Source", typeof(Source),
-            typeof(Waveform), new UIPropertyMetadata(null, OnSourceChanged, OnCoerceSource));
+            typeof(DynamicWaveform), new UIPropertyMetadata(null, OnSourceChanged, OnCoerceSource));
 
         private static object OnCoerceSource(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceSource((Source)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceSource((Source)value);
             else
                 return value;
         }
 
         private static void OnSourceChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnSourceChanged((Source)e.OldValue, (Source)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnSourceChanged((Source)e.OldValue, (Source)e.NewValue);
         }
 
         /// <summary>
@@ -63,28 +69,47 @@ namespace Audion.Visualization
             _source.SourcePropertyChangedEvent += _source_SourcePropertyChangedEvent;
         }
 
-        private void _source_SourceEvent(object sender, SourceEventArgs e)
-        {
-            if (e.Event == Source.Event.Loaded)
-            {
-                // new track loaded into the source.
-                Source.GetData(Resolution);
-            }
-        }
-
         private void _source_SourcePropertyChangedEvent(object sender, SourcePropertyChangedEventArgs e)
         {
-            if (e.Property == Source.Property.WaveformData)
+            if (e.Property == Source.Property.Position)
             {
                 Dispatcher.BeginInvoke((Action)delegate
                 {
                     UpdateWaveform();
                 });
             }
+            else if (e.Property == Source.Property.PlaybackState)
+            {
+                if ((CSCore.SoundOut.PlaybackState)e.Value == CSCore.SoundOut.PlaybackState.Stopped)
+                {
+                    wavelengthDataSnapshot = null;
+                    cachedSeconds = 0;
+                    cachedPosition = 0;
+                    byteToResolutionRatio = 0;
+                }
+            }
+        }
+
+        private void _source_SourceEvent(object sender, SourceEventArgs e)
+        {
+            if (e.Event == Source.Event.Loaded)
+            {
+                wavelengthDataSnapshot = null;
+                cachedSeconds = 0;
+                cachedPosition = 0;
+                byteToResolutionRatio = 0;
+
+                // new track loaded into the source. Get the waveform data as fast as possible.
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    UpdateWaveform();
+
+                });
+            }
         }
 
         /// <summary>
-        /// Gets or sets a Source for the Waveform.
+        /// Gets or sets a Source for the DynamicWaveform.
         /// </summary>        
         public Source Source
         {
@@ -103,24 +128,24 @@ namespace Audion.Visualization
         #region Resolution Property
 
         public static readonly DependencyProperty ResolutionProperty = DependencyProperty.Register("Resolution", typeof(int),
-            typeof(Waveform), new UIPropertyMetadata(2048, OnResolutionChanged, OnCoerceResolution));
+            typeof(DynamicWaveform), new UIPropertyMetadata(2048, OnResolutionChanged, OnCoerceResolution));
 
         private static object OnCoerceResolution(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceResolution((int)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceResolution((int)value);
             else
                 return value;
         }
 
         private static void OnResolutionChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnResolutionChanged((int)e.OldValue, (int)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnResolutionChanged((int)e.OldValue, (int)e.NewValue);
         }
 
         /// <summary>
@@ -148,7 +173,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a Resolution for the Waveform.
+        /// Gets or sets a Resolution for the DynamicWaveform.
         /// </summary>        
         public int Resolution
         {
@@ -164,27 +189,88 @@ namespace Audion.Visualization
 
         #endregion
 
+        #region WaveformLength Property
+
+        public static readonly DependencyProperty WaveformLengthProperty = DependencyProperty.Register("WaveformLength", typeof(double),
+            typeof(DynamicWaveform), new UIPropertyMetadata(1.0D, OnWaveformLengthChanged, OnCoerceWaveformLength));
+
+        private static object OnCoerceWaveformLength(DependencyObject o, object value)
+        {
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
+
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceWaveformLength((double)value);
+            else
+                return value;
+        }
+
+        private static void OnWaveformLengthChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
+
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnWaveformLengthChanged((double)e.OldValue, (double)e.NewValue);
+        }
+
+        /// <summary>
+        /// Coerces the value of <see cref="WaveformLength"/> when a new value is applied.
+        /// </summary>
+        /// <param name="value">The value that was set on <see cref="WaveformLength"/></param>
+        /// <returns>The adjusted value of <see cref="WaveformLength"/></returns>
+        protected virtual double OnCoerceWaveformLength(double value)
+        {
+            return value;
+        }
+
+        /// <summary>
+        /// Called after the <see cref="WaveformLength"/> value has changed.
+        /// </summary>
+        /// <param name="oldValue">The previous value of <see cref="WaveformLength"/></param>
+        /// <param name="newValue">The new value of <see cref="WaveformLength"/></param>
+        protected virtual void OnWaveformLengthChanged(double oldValue, double newValue)
+        {
+            
+        }
+
+        /// <summary>
+        /// Gets or sets a WaveformLength for the DynamicWaveform. This is the number
+        /// of seconds of waveform to display.
+        /// </summary>        
+        public double WaveformLength
+        {
+            get
+            {
+                return (double)GetValue(WaveformLengthProperty);
+            }
+            set
+            {
+                SetValue(WaveformLengthProperty, value);
+            }
+        }
+
+        #endregion
+
         #region LeftBrush Property
 
         public static readonly DependencyProperty LeftBrushProperty = DependencyProperty.Register("LeftBrush", typeof(Brush),
-            typeof(Waveform), new UIPropertyMetadata(null, OnLeftBrushChanged, OnCoerceLeftBrush));
+            typeof(DynamicWaveform), new UIPropertyMetadata(null, OnLeftBrushChanged, OnCoerceLeftBrush));
 
         private static object OnCoerceLeftBrush(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceLeftBrush((Brush)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceLeftBrush((Brush)value);
             else
                 return value;
         }
 
         private static void OnLeftBrushChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnLeftBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnLeftBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
         }
 
         /// <summary>
@@ -211,7 +297,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a LeftBrush for the Waveform.
+        /// Gets or sets a LeftBrush for the DynamicWaveform.
         /// </summary>        
         public Brush LeftBrush
         {
@@ -230,24 +316,24 @@ namespace Audion.Visualization
         #region RightBrush Property
 
         public static readonly DependencyProperty RightBrushProperty = DependencyProperty.Register("RightBrush", typeof(Brush),
-            typeof(Waveform), new UIPropertyMetadata(null, OnRightBrushChanged, OnCoerceRightBrush));
+            typeof(DynamicWaveform), new UIPropertyMetadata(null, OnRightBrushChanged, OnCoerceRightBrush));
 
         private static object OnCoerceRightBrush(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceRightBrush((Brush)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceRightBrush((Brush)value);
             else
                 return value;
         }
 
         private static void OnRightBrushChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnRightBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnRightBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
         }
 
         /// <summary>
@@ -274,7 +360,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a RightBrush for the Waveform.
+        /// Gets or sets a RightBrush for the DynamicWaveform.
         /// </summary>        
         public Brush RightBrush
         {
@@ -293,24 +379,24 @@ namespace Audion.Visualization
         #region LeftStroke Property
 
         public static readonly DependencyProperty LeftStrokeProperty = DependencyProperty.Register("LeftStroke", typeof(Brush),
-            typeof(Waveform), new UIPropertyMetadata(null, OnLeftStrokeChanged, OnCoerceLeftStroke));
+            typeof(DynamicWaveform), new UIPropertyMetadata(null, OnLeftStrokeChanged, OnCoerceLeftStroke));
 
         private static object OnCoerceLeftStroke(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceLeftStroke((Brush)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceLeftStroke((Brush)value);
             else
                 return value;
         }
 
         private static void OnLeftStrokeChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnLeftStrokeChanged((Brush)e.OldValue, (Brush)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnLeftStrokeChanged((Brush)e.OldValue, (Brush)e.NewValue);
         }
 
         /// <summary>
@@ -337,7 +423,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a LeftStroke for the Waveform.
+        /// Gets or sets a LeftStroke for the DynamicWaveform.
         /// </summary>        
         public Brush LeftStroke
         {
@@ -356,24 +442,24 @@ namespace Audion.Visualization
         #region RightStroke Property
 
         public static readonly DependencyProperty RightStrokeProperty = DependencyProperty.Register("RightStroke", typeof(Brush),
-            typeof(Waveform), new UIPropertyMetadata(null, OnRightStrokeChanged, OnCoerceRightStroke));
+            typeof(DynamicWaveform), new UIPropertyMetadata(null, OnRightStrokeChanged, OnCoerceRightStroke));
 
         private static object OnCoerceRightStroke(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceRightStroke((Brush)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceRightStroke((Brush)value);
             else
                 return value;
         }
 
         private static void OnRightStrokeChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnRightStrokeChanged((Brush)e.OldValue, (Brush)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnRightStrokeChanged((Brush)e.OldValue, (Brush)e.NewValue);
         }
 
         /// <summary>
@@ -400,7 +486,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a RightStroke for the Waveform.
+        /// Gets or sets a RightStroke for the DynamicWaveform.
         /// </summary>        
         public Brush RightStroke
         {
@@ -419,24 +505,24 @@ namespace Audion.Visualization
         #region LeftStrokeThickness Property
 
         public static readonly DependencyProperty LeftStrokeThicknessProperty = DependencyProperty.Register("LeftStrokeThickness", typeof(double),
-            typeof(Waveform), new UIPropertyMetadata(0.0d, OnLeftStrokeThicknessChanged, OnCoerceLeftStrokeThickness));
+            typeof(DynamicWaveform), new UIPropertyMetadata(0.0d, OnLeftStrokeThicknessChanged, OnCoerceLeftStrokeThickness));
 
         private static object OnCoerceLeftStrokeThickness(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceLeftStrokeThickness((double)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceLeftStrokeThickness((double)value);
             else
                 return value;
         }
 
         private static void OnLeftStrokeThicknessChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnLeftStrokeThicknessChanged((double)e.OldValue, (double)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnLeftStrokeThicknessChanged((double)e.OldValue, (double)e.NewValue);
         }
 
         /// <summary>
@@ -460,7 +546,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a LeftStrokeThickness for the Waveform.
+        /// Gets or sets a LeftStrokeThickness for the DynamicWaveform.
         /// </summary>        
         public double LeftStrokeThickness
         {
@@ -479,24 +565,24 @@ namespace Audion.Visualization
         #region RightStrokeThickness Property
 
         public static readonly DependencyProperty RightStrokeThicknessProperty = DependencyProperty.Register("RightStrokeThickness", typeof(double),
-            typeof(Waveform), new UIPropertyMetadata(0.0d, OnRightStrokeThicknessChanged, OnCoerceRightStrokeThickness));
+            typeof(DynamicWaveform), new UIPropertyMetadata(0.0d, OnRightStrokeThicknessChanged, OnCoerceRightStrokeThickness));
 
         private static object OnCoerceRightStrokeThickness(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceRightStrokeThickness((double)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceRightStrokeThickness((double)value);
             else
                 return value;
         }
 
         private static void OnRightStrokeThicknessChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnRightStrokeThicknessChanged((double)e.OldValue, (double)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnRightStrokeThicknessChanged((double)e.OldValue, (double)e.NewValue);
         }
 
         /// <summary>
@@ -520,7 +606,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a RightStrokeThickness for the Waveform.
+        /// Gets or sets a RightStrokeThickness for the DynamicWaveform.
         /// </summary>        
         public double RightStrokeThickness
         {
@@ -539,24 +625,24 @@ namespace Audion.Visualization
         #region CenterLineBrush Property
         
         public static readonly DependencyProperty CenterLineBrushProperty = DependencyProperty.Register("CenterLineBrush", typeof(Brush),
-            typeof(Waveform), new UIPropertyMetadata(Brushes.White, OnCenterLineBrushChanged, OnCoerceCenterLineBrush));
+            typeof(DynamicWaveform), new UIPropertyMetadata(Brushes.White, OnCenterLineBrushChanged, OnCoerceCenterLineBrush));
 
         private static object OnCoerceCenterLineBrush(DependencyObject o, object value)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                return waveform.OnCoerceCenterLineBrush((Brush)value);
+            if (DynamicWaveform != null)
+                return DynamicWaveform.OnCoerceCenterLineBrush((Brush)value);
             else
                 return value;
         }
 
         private static void OnCenterLineBrushChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Waveform waveform = o as Waveform;
+            DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
-            if (waveform != null)
-                waveform.OnCenterLineBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
+            if (DynamicWaveform != null)
+                DynamicWaveform.OnCenterLineBrushChanged((Brush)e.OldValue, (Brush)e.NewValue);
         }
 
         /// <summary>
@@ -583,7 +669,7 @@ namespace Audion.Visualization
         }
 
         /// <summary>
-        /// Gets or sets a CenterLineBrush for the Waveform.
+        /// Gets or sets a CenterLineBrush for the DynamicWaveform.
         /// </summary>        
         public Brush CenterLineBrush
         {
@@ -601,9 +687,9 @@ namespace Audion.Visualization
 
         #endregion
 
-        static Waveform()
+        static DynamicWaveform()
         {
-            Waveform.DefaultStyleKeyProperty.OverrideMetadata(typeof(Waveform), new FrameworkPropertyMetadata(typeof(Waveform)));
+            DynamicWaveform.DefaultStyleKeyProperty.OverrideMetadata(typeof(DynamicWaveform), new FrameworkPropertyMetadata(typeof(DynamicWaveform)));
 
             Application.SetFramerate();
         }
@@ -696,16 +782,50 @@ namespace Audion.Visualization
             const double maxValue = 1.5;
             const double dbScale = (maxValue - minValue);
 
-            if (_source == null || Source.WaveformData == null || waveformCanvas == null ||
+            if (Source == null || waveformCanvas == null || Source.SampleLength == 0 ||
                 waveformCanvas.RenderSize.Width < 1 || waveformCanvas.RenderSize.Height < 1)
             {
                 return;
             }
 
+            if (wavelengthDataSnapshot == null)
+            {
+                var start = Source.BytesPerSecond * Source.Position.TotalSeconds;
+                wavelengthDataSnapshot = Source.GetDataRange((int)start, (int)(Source.BytesPerSecond * WaveformLength), Resolution);
+                cachedSeconds = WaveformLength;
+                byteToResolutionRatio = (Source.BytesPerSecond * WaveformLength) / Resolution;
+            }
+            else
+            {
+                var timeChange = Source.Position.TotalSeconds - cachedPosition;
+                // Since we have progressed in time through the media, we need to draw this in the waveform.
+                var start = Source.BytesPerSecond * cachedSeconds;
+                var end = (Source.BytesPerSecond * timeChange) + start;
+                var length = end - start;
+                cachedPosition = Source.Position.TotalSeconds;
+                cachedSeconds += timeChange;
+                var resolution = (int)(length / byteToResolutionRatio);
+
+                if (resolution > Resolution)
+                    resolution = Resolution;
+
+                var timeChangeSnapshot = Source.GetDataRange((int)start, (int)length, resolution);
+
+                if (timeChangeSnapshot != null)
+                {
+                    // shift the wavelengthDataSnapshot to include the time change.
+                    Array.Copy(wavelengthDataSnapshot, resolution, wavelengthDataSnapshot, 0, wavelengthDataSnapshot.Length - resolution);
+                    Array.Copy(timeChangeSnapshot, 0, wavelengthDataSnapshot, wavelengthDataSnapshot.Length - resolution, resolution);
+                }
+            }
+
+            if (wavelengthDataSnapshot == null)
+                return;
+
             double leftRenderHeight;
             double rightRenderHeight;
 
-            int pointCount = (int)(Source.WaveformData.Length / 2.0d);
+            int pointCount = wavelengthDataSnapshot.Length / 2;
             double pointThickness = waveformCanvas.RenderSize.Width / pointCount;
             double waveformSideHeight = waveformCanvas.RenderSize.Height / 2.0d;
             double centerHeight = waveformSideHeight;
@@ -718,7 +838,7 @@ namespace Audion.Visualization
                 centerLine.Y2 = centerHeight;
             }
 
-            if (Source.WaveformData != null && Source.WaveformData.Length > 1)
+            if (wavelengthDataSnapshot.Length > 1)
             {
                 PolyLineSegment leftWaveformPolyLine = new PolyLineSegment();
                 leftWaveformPolyLine.Points.Add(new Point(0, centerHeight));
@@ -728,12 +848,12 @@ namespace Audion.Visualization
 
                 double xLocation = 0.0d;
 
-                for (int i = 0; i < Source.WaveformData.Length; i += 2)
+                for (int i = 0; i < wavelengthDataSnapshot.Length; i += 2)
                 {
                     xLocation = (i / 2) * pointThickness;
-                    leftRenderHeight = ((Source.WaveformData[i] - minValue) / dbScale) * waveformSideHeight;
+                    leftRenderHeight = ((wavelengthDataSnapshot[i] - minValue) / dbScale) * waveformSideHeight;
                     leftWaveformPolyLine.Points.Add(new Point(xLocation, centerHeight - leftRenderHeight));
-                    rightRenderHeight = ((Source.WaveformData[i + 1] - minValue) / dbScale) * waveformSideHeight;
+                    rightRenderHeight = ((wavelengthDataSnapshot[i + 1] - minValue) / dbScale) * waveformSideHeight;
                     rightWaveformPolyLine.Points.Add(new Point(xLocation, centerHeight + rightRenderHeight));
                 }
 

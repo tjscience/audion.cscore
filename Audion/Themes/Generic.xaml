@@ -61,21 +61,33 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="0" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
                             <Canvas Name="PART_Waveform"
-                                    Grid.Row="1"
                                     ClipToBounds="True" />
-                            <Border HorizontalAlignment="Left"
-                                    VerticalAlignment="Stretch"
-                                    Width="1"
-                                    Background="#FF222222"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="{x:Type visualization:DynamicWaveform}">
+        <Setter Property="LeftBrush" Value="#FF00C3FF" />
+        <Setter Property="RightBrush" Value="#FF0273FA" />
+        <Setter Property="CenterLineBrush" Value="#FFFFFFFF" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type visualization:DynamicWaveform}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid>
+                            <Canvas Name="PART_Waveform"
+                                    ClipToBounds="True" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
