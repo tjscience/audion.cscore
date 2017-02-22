@@ -1,6 +1,8 @@
 # audion
 An audio visualization and processing framework for WPF
 
+[![Github-Release](https://img.shields.io/github/release/audion/rubidium.svg)](https://github.com/tjscience/audion/releases)
+
 Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .NET Audio Library
 
 ### Included in Audion (so far):
