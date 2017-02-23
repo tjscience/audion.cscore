@@ -2,7 +2,7 @@
 An audio visualization and processing framework for WPF
 
 [![Github-Release](https://img.shields.io/github/release/audion/rubidium.svg)](https://github.com/tjscience/audion/releases)
-![Appveyor-Build](https://ci.appveyor.com/api/projects/status/github/tjscience/audion?svg=true)
+[![Appveyor-Build](https://ci.appveyor.com/api/projects/status/github/tjscience/audion?svg=true)](https://ci.appveyor.com/project/tjscience/audion)
 
 [![Donate](https://pledgie.com/campaigns/33441.png?skin_name=chrome)](https://pledgie.com/campaigns/33441)
 
