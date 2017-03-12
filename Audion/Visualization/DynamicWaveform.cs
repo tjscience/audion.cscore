@@ -9,7 +9,7 @@ namespace Audion.Visualization
     [TemplatePart(Name = "PART_Waveform", Type = typeof(Canvas))]
     public class DynamicWaveform : Control
     {
-        private Source _source;
+        private ISource _source;
 
         private Canvas waveformCanvas;
         private readonly Path leftPath = new Path();
@@ -26,7 +26,7 @@ namespace Audion.Visualization
 
         #region Source Property
 
-        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register("Source", typeof(Source),
+        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register("Source", typeof(ISource),
             typeof(DynamicWaveform), new UIPropertyMetadata(null, OnSourceChanged, OnCoerceSource));
 
         private static object OnCoerceSource(DependencyObject o, object value)
@@ -34,7 +34,7 @@ namespace Audion.Visualization
             DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
             if (DynamicWaveform != null)
-                return DynamicWaveform.OnCoerceSource((Source)value);
+                return DynamicWaveform.OnCoerceSource((ISource)value);
             else
                 return value;
         }
@@ -44,7 +44,7 @@ namespace Audion.Visualization
             DynamicWaveform DynamicWaveform = o as DynamicWaveform;
 
             if (DynamicWaveform != null)
-                DynamicWaveform.OnSourceChanged((Source)e.OldValue, (Source)e.NewValue);
+                DynamicWaveform.OnSourceChanged((ISource)e.OldValue, (ISource)e.NewValue);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Audion.Visualization
         /// </summary>
         /// <param name="value">The value that was set on <see cref="Source"/></param>
         /// <returns>The adjusted value of <see cref="Source"/></returns>
-        protected virtual Source OnCoerceSource(Source value)
+        protected virtual ISource OnCoerceSource(ISource value)
         {
             return value;
         }
@@ -62,7 +62,7 @@ namespace Audion.Visualization
         /// </summary>
         /// <param name="oldValue">The previous value of <see cref="Source"/></param>
         /// <param name="newValue">The new value of <see cref="Source"/></param>
-        protected virtual void OnSourceChanged(Source oldValue, Source newValue)
+        protected virtual void OnSourceChanged(ISource oldValue, ISource newValue)
         {
             _source = Source;
             _source.SourceEvent += _source_SourceEvent;
@@ -71,14 +71,14 @@ namespace Audion.Visualization
 
         private void _source_SourcePropertyChangedEvent(object sender, SourcePropertyChangedEventArgs e)
         {
-            if (e.Property == Source.Property.Position)
+            if (e.Property == Audion.SourceProperty.Position)
             {
                 Dispatcher.BeginInvoke((Action)delegate
                 {
                     UpdateWaveform();
                 });
             }
-            else if (e.Property == Source.Property.PlaybackState)
+            else if (e.Property == Audion.SourceProperty.PlaybackState)
             {
                 if ((CSCore.SoundOut.PlaybackState)e.Value == CSCore.SoundOut.PlaybackState.Stopped)
                 {
@@ -92,7 +92,7 @@ namespace Audion.Visualization
 
         private void _source_SourceEvent(object sender, SourceEventArgs e)
         {
-            if (e.Event == Source.Event.Loaded)
+            if (e.Event == SourceEventType.Loaded)
             {
                 wavelengthDataSnapshot = null;
                 cachedSeconds = 0;
@@ -111,11 +111,11 @@ namespace Audion.Visualization
         /// <summary>
         /// Gets or sets a Source for the DynamicWaveform.
         /// </summary>        
-        public Source Source
+        public ISource Source
         {
             get
             {
-                return (Source)GetValue(SourceProperty);
+                return (ISource)GetValue(SourceProperty);
             }
             set
             {

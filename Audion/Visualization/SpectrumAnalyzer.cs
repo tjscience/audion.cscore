@@ -1,4 +1,6 @@
 ﻿using CSCore;
+using CSCore.SoundIn;
+using CSCore.SoundOut;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -11,8 +13,8 @@ namespace Audion.Visualization
     [TemplatePart(Name = "PART_Spectrum", Type = typeof(Grid))]
     public class SpectrumAnalyzer : Control
     {
-        private Source _source;
-        private ISpectrumProvider _spectrumProvider;
+        private ISource _source;
+        internal ISpectrumProvider _spectrumProvider;
 
         // visual elements
         private Grid spectrumGrid;
@@ -35,7 +37,7 @@ namespace Audion.Visualization
 
         #region Source Property
 
-        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register("Source", typeof(Source),
+        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register("Source", typeof(ISource),
             typeof(SpectrumAnalyzer), new UIPropertyMetadata(null, OnSourceChanged, OnCoerceSource));
 
         private static object OnCoerceSource(DependencyObject o, object value)
@@ -43,7 +45,7 @@ namespace Audion.Visualization
             SpectrumAnalyzer spectrumAnalyzer = o as SpectrumAnalyzer;
 
             if (spectrumAnalyzer != null)
-                return spectrumAnalyzer.OnCoerceSource((Source)value);
+                return spectrumAnalyzer.OnCoerceSource((ISource)value);
             else
                 return value;
         }
@@ -53,7 +55,7 @@ namespace Audion.Visualization
             SpectrumAnalyzer spectrumAnalyzer = o as SpectrumAnalyzer;
 
             if (spectrumAnalyzer != null)
-                spectrumAnalyzer.OnSourceChanged((Source)e.OldValue, (Source)e.NewValue);
+                spectrumAnalyzer.OnSourceChanged((ISource)e.OldValue, (ISource)e.NewValue);
         }
 
         /// <summary>
@@ -61,7 +63,7 @@ namespace Audion.Visualization
         /// </summary>
         /// <param name="value">The value that was set on <see cref="Source"/></param>
         /// <returns>The adjusted value of <see cref="Source"/></returns>
-        protected virtual Source OnCoerceSource(Source value)
+        protected virtual ISource OnCoerceSource(ISource value)
         {
             return value;
         }
@@ -71,7 +73,7 @@ namespace Audion.Visualization
         /// </summary>
         /// <param name="oldValue">The previous value of <see cref="Source"/></param>
         /// <param name="newValue">The new value of <see cref="Source"/></param>
-        protected virtual void OnSourceChanged(Source oldValue, Source newValue)
+        protected virtual void OnSourceChanged(ISource oldValue, ISource newValue)
         {
             _source = Source;
             _source.SourceEvent += _source_SourceEvent;
@@ -80,7 +82,7 @@ namespace Audion.Visualization
 
         private void _source_SourceEvent(object sender, SourceEventArgs e)
         {
-            if (e.Event == Source.Event.Loaded)
+            if (e.Event == SourceEventType.Loaded)
             {
                 _spectrumProvider = Source.SpectrumProvider;
                 UpdateFrequencyMapping();
@@ -89,20 +91,36 @@ namespace Audion.Visualization
 
         private void _source_SourcePropertyChangedEvent(object sender, SourcePropertyChangedEventArgs e)
         {
-            if (e.Property == Source.Property.FftData)
+            if (e.Property == Audion.SourceProperty.FftData)
             {
                 UpdateSpectrum(_spectrumResolution, _source.FftData);
+            }
+            else if (e.Property == Audion.SourceProperty.PlaybackState && (PlaybackState)e.Value == PlaybackState.Playing)
+            {
+                CreateBars();
+            }
+            else if (e.Property == Audion.SourceProperty.RecordingState && (RecordingState)e.Value == RecordingState.Recording)
+            {
+                CreateBars();
+            }
+            else if (e.Property == Audion.SourceProperty.PlaybackState && (PlaybackState)e.Value != PlaybackState.Playing)
+            {
+                SilenceBars();
+            }
+            else if (e.Property == Audion.SourceProperty.RecordingState && (RecordingState)e.Value == RecordingState.Stopped)
+            {
+                SilenceBars();
             }
         }
 
         /// <summary>
         /// Gets or sets a Source for the SpectrumAnalyzer.
         /// </summary>        
-        public Source Source
+        public ISource Source
         {
             get
             {
-                return (Source)GetValue(SourceProperty);
+                return (ISource)GetValue(SourceProperty);
             }
             set
             {
@@ -578,23 +596,39 @@ namespace Audion.Visualization
 
         private void CreateBars()
         {
-            if (spectrumGrid != null)
+            Dispatcher.BeginInvoke((Action)delegate
             {
-                // Let's try to make this use less CPU by reusing the spectrum bars!
-                bars = new Border[FrequencyBarCount];
-
-                for (var i = 0; i < bars.Length; i++)
+                if (spectrumGrid != null)
                 {
-                    bars[i] = new Border();
+                    // Let's try to make this use less CPU by reusing the spectrum bars!
+                    bars = new Border[FrequencyBarCount];
+
+                    for (var i = 0; i < bars.Length; i++)
+                    {
+                        bars[i] = new Border();
+                    }
+
+                    spectrumGrid.Children.Clear();
+
+                    for (var i = 0; i < bars.Length; i++)
+                    {
+                        spectrumGrid.Children.Add(bars[i]);
+                    }
+                }
+            }, DispatcherPriority.Render);
+        }
+
+        private void SilenceBars()
+        {
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                if (spectrumGrid != null)
+                {
+                    spectrumGrid.Children.Clear();
+                    spectrumGrid.CacheMode = new BitmapCache();
                 }
 
-                spectrumGrid.Children.Clear();
-
-                for (var i = 0; i < bars.Length; i++)
-                {
-                    spectrumGrid.Children.Add(bars[i]);
-                }
-            }
+            }, DispatcherPriority.Render);
         }
 
         private void UpdateFrequencyMapping()
@@ -680,7 +714,7 @@ namespace Audion.Visualization
                 }
             }
 
-            Dispatcher.BeginInvoke((Action)delegate
+            Dispatcher.Invoke((Action)delegate
             {
                 var width = this.RenderSize.Width;
                 var height = this.RenderSize.Height;

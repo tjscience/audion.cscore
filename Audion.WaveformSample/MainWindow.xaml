@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Audion.Sample"
         xmlns:audion="clr-namespace:Audion.Visualization;assembly=Audion"
         mc:Ignorable="d" Background="#FF000000"
-        Title="Audion Sample" Height="300" Width="500">
+        Title="Audion Sample" WindowState="Maximized">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -19,6 +19,9 @@
         <DockPanel LastChildFill="False" Grid.ColumnSpan="2">
             <Button Click="Load">
                 Load
+            </Button>
+            <Button Click="Record">
+                Record
             </Button>
             <Button Click="Play">
                 Play
@@ -35,6 +38,22 @@
             <Button Click="FastForward">
                 >
             </Button>
+            <ComboBox ItemsSource="{Binding InputDevices}"
+                      SelectedItem="{Binding SelectedInputDevice}"
+                      IsSynchronizedWithCurrentItem="True"
+                      SelectedIndex="0"
+                      DisplayMemberPath="Name" 
+                      MinWidth="150">
+                
+            </ComboBox>
+            <ComboBox ItemsSource="{Binding OutputDevices}" 
+                      SelectedItem="{Binding SelectedOutputDevice}"
+                      IsSynchronizedWithCurrentItem="True"
+                      SelectedIndex="0"
+                      DisplayMemberPath="Name" 
+                      MinWidth="150">
+
+            </ComboBox>
         </DockPanel>
 
         <audion:Timeline Height="30" Grid.Row="1" Name="timeline" FontFamily="pack://application:,,,/Resources/#digital-7" FontSize="12"
