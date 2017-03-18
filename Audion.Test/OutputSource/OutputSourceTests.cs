@@ -40,7 +40,6 @@ namespace Audion.Test.OutputSource
         [TestMethod]
         public void PlayTest()
         {
-            Trace.Write(Utils.WhiteNoiseSampleMP3);
             var source = new Audion.OutputSource(Utils.WhiteNoiseSampleMP3);
             source.Play();
             Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
