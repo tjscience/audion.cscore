@@ -35,8 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CSCore">
-      <HintPath>..\..\..\..\..\..\..\..\Source\Repos\cscore\CSCore\bin\Release\CSCore.dll</HintPath>
+    <Reference Include="CSCore, Version=1.2.6284.25483, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Audion\Lib\CSCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
