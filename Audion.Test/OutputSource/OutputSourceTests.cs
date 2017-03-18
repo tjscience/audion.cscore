@@ -39,41 +39,31 @@ namespace Audion.Test.OutputSource
         [TestMethod]
         public void PlayTest()
         {
-            Task.Factory.StartNew(() =>
-            {
-                var source = new Audion.OutputSource(Utils.WhiteNoiseSampleMP3);
-                source.Play();
-                Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
-                Utils.Wait(3);
-                source.Dispose();
-
-            }).Wait();
+            var source = new Audion.OutputSource(Utils.WhiteNoiseSampleMP3);
+            source.Play();
+            Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
+            Utils.Wait(3);
+            source.Dispose();
         }
 
         [TestMethod]
         public void PlayVideoTest()
         {
-            Task.Factory.StartNew(() =>
-            {
-                var source = new Audion.OutputSource(Utils.VideoSampleMP4);
-                source.Play();
-                Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
-                Utils.Wait(3);
-                source.Dispose();
-            }).Wait();
+            var source = new Audion.OutputSource(Utils.VideoSampleMP4);
+            source.Play();
+            Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
+            Utils.Wait(3);
+            source.Dispose();
         }
 
         [TestMethod]
         public void PlayUriTest()
         {
-            Task.Factory.StartNew(() =>
-            {
-                var source = new Audion.OutputSource(Utils.UriStreamMP3);
-                source.Play();
-                Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
-                Utils.Wait(3);
-                source.Dispose();
-            }).Wait();
+            var source = new Audion.OutputSource(Utils.UriStreamMP3);
+            source.Play();
+            Assert.AreEqual(CSCore.SoundOut.PlaybackState.Playing, source.PlaybackState);
+            Utils.Wait(3);
+            source.Dispose();
         }
 
         #endregion
