@@ -68,6 +68,7 @@
     </Compile>
     <Compile Include="OutputSource\OutputSourceTests.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="UtilsTests\UtilsTests.cs" />
     <Compile Include="Visualization\Waveform\WaveformTests.cs" />
   </ItemGroup>
   <ItemGroup>
