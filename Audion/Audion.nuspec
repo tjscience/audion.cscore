@@ -8,10 +8,8 @@
     <owners>Terry Phillips</owners>
     <licenseUrl>https://github.com/tjscience/audion/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/tjscience/audion</projectUrl>
-    <iconUrl></iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An audio visualization and processing framework for WPF.</description>
-    <summary></summary>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags></tags>
