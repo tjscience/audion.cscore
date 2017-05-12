@@ -34,5 +34,15 @@ namespace Audion.Test.InputSource
             Assert.AreEqual(10, actual);
             output.Dispose();
         }
+
+        [TestMethod]
+        public void RecordWithoutFileNameTest()
+        {
+            var device = Device.GetDefaultRecordingDevice();
+            var input = new Audion.InputSource(device);
+            input.Record(null);
+            input.Stop();
+            input.Dispose();
+        }
     }
 }

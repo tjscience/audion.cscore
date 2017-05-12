@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audion", "Audion\Audion.csproj", "{65D33630-100E-4976-81DA-BB4124FE381B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audion.Sample", "Audion.WaveformSample\Audion.Sample.csproj", "{8FB5C71B-F9E9-4F43-A6B2-730F35E25586}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audion.Sample", "Audion.Sample\Audion.Sample.csproj", "{8FB5C71B-F9E9-4F43-A6B2-730F35E25586}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audion.Test", "Audion.Test\Audion.Test.csproj", "{9F873A0A-01CA-4BF3-862B-237CCE036352}"
 EndProject

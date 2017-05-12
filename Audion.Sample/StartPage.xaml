@@ -1,0 +1,88 @@
+﻿<Window x:Class="Audion.Sample.StartPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Audion.Sample"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        Style="{StaticResource {x:Type Window}}"
+        mc:Ignorable="d"
+        Title="Audion Samples" WindowState="Maximized">
+    <Grid Focusable="True" PreviewMouseLeftButtonDown="Focus">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="4*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Height="30" Padding="3" Background="#FF3A3A3A">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <DockPanel LastChildFill="False">
+                    <Label>INPUT</Label>
+                    <fa:ImageAwesome Icon="FileAudioOutline" Foreground="Red" Margin="3" PreviewMouseLeftButtonUp="SetInputFile" ToolTip="Load Input Media" />
+                    <fa:ImageAwesome Icon="Circle" Foreground="Red" Margin="3" PreviewMouseLeftButtonUp="Record" ToolTip="Record" />
+                    <fa:ImageAwesome Icon="Pause" Foreground="Yellow" Margin="3" PreviewMouseLeftButtonUp="PauseRecording" ToolTip="Pause Recording" />
+                    <fa:ImageAwesome Icon="Stop" Foreground="Gray" Margin="3" PreviewMouseLeftButtonUp="StopRecording" ToolTip="Stop Recording" />
+                    <DockPanel>
+                        <Label>Device:</Label>
+                        <ComboBox MinWidth="200" x:Name="cb_inputDevices">
+                            
+                        </ComboBox>
+                    </DockPanel>
+                </DockPanel>
+
+                <DockPanel Grid.Column="1" LastChildFill="False">
+                    <Label>OUTPUT</Label>
+                    <fa:ImageAwesome Icon="FileAudioOutline" Foreground="LightBlue" Margin="3" PreviewMouseLeftButtonUp="LoadMedia" ToolTip="Load Output Media" />
+                    <fa:ImageAwesome Icon="Play" Foreground="LimeGreen" Margin="3" PreviewMouseLeftButtonUp="Play" ToolTip="Play" />
+                    <fa:ImageAwesome Icon="Pause" Foreground="Yellow" Margin="3" PreviewMouseLeftButtonUp="PausePlayback" ToolTip="Pause Playback" />
+                    <fa:ImageAwesome Icon="Stop" Foreground="Gray" Margin="3" PreviewMouseLeftButtonUp="StopPlayback" ToolTip="Stop Playback" />
+                    <DockPanel>
+                        <Label>Device:</Label>
+                        <ComboBox MinWidth="200" x:Name="cb_outputDevices">
+
+                        </ComboBox>
+                    </DockPanel>
+
+                </DockPanel>
+
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" Grid.ColumnSpan="3" Height="20" Padding="3" Background="#FF2A2A2A">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Border>
+                    <TextBlock Name="InputMediaPath" />
+                </Border>
+
+                <Border Grid.Column="1">
+                    <TextBlock Name="OutputMediaPath"/>
+                </Border>
+            </Grid>
+        </Border>
+        <StackPanel Grid.Row="2" Grid.Column="0" Name="Samples">
+            <Button Content="Output Waveform" Click="OpenSample" Tag="output-waveform" Padding="5,3,5,3" />
+            <Button Content="Input Dynamic Waveform" Click="OpenSample" Tag="input-dynamic-waveform" Padding="5,3,5,3" />
+            <Button Content="Output Dynamic Waveform" Click="OpenSample" Tag="output-dynamic-waveform" Padding="5,3,5,3" />
+            <Button Content="Output Timeline" Click="OpenSample" Tag="output-timeline" Padding="5,3,5,3" />
+            <Button Content="Output Spectrum Analyzer" Click="OpenSample" Tag="output-spectrum-analyzer" Padding="5,3,5,3" />
+        </StackPanel>
+        <GridSplitter Grid.Row="2" Grid.Column="1" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Width="10"
+                      BorderBrush="#FF555555" Background="Transparent" BorderThickness="1,0,0,0"
+                      Margin="5,0,0,0"/>
+        <ContentControl Grid.Row="2" Grid.Column="2" Name="Display" Margin="0,10,10,10" />
+    </Grid>
+</Window>

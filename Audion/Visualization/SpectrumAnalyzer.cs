@@ -382,7 +382,7 @@ namespace Audion.Visualization
         #region FrequencyBarBorderBrush Property
 
         public static readonly DependencyProperty FrequencyBarBorderBrushProperty = DependencyProperty.Register("FrequencyBarBorderBrush", typeof(Brush),
-            typeof(SpectrumAnalyzer), new UIPropertyMetadata(null, OnFrequencyBarBorderBrushChanged, OnCoerceFrequencyBarBorderBrush));
+            typeof(SpectrumAnalyzer), new UIPropertyMetadata(Brushes.Transparent, OnFrequencyBarBorderBrushChanged, OnCoerceFrequencyBarBorderBrush));
 
         private static object OnCoerceFrequencyBarBorderBrush(DependencyObject o, object value)
         {

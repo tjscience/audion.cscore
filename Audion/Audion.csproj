@@ -51,6 +51,7 @@
     <Compile Include="BasicSpectrumProvider.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceType.cs" />
+    <Compile Include="RecordingState.cs" />
     <Compile Include="SourceEventArgs.cs" />
     <Compile Include="SourceEventType.cs" />
     <Compile Include="InputSource.cs" />

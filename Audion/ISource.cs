@@ -10,7 +10,7 @@ namespace Audion
         float[] WaveformData { get; }
         long SampleLength { get; }
         int BytesPerSecond { get; }
-        TimeSpan Position { get; set; }
+        TimeSpan Position { get; }
         BasicSpectrumProvider SpectrumProvider { get; }
         TimeSpan Length { get; }
 

@@ -88,6 +88,16 @@ namespace Audion.Visualization
                     byteToResolutionRatio = 0;
                 }
             }
+            else if (e.Property == Audion.SourceProperty.RecordingState)
+            {
+                if ((RecordingState)e.Value == RecordingState.Stopped)
+                {
+                    wavelengthDataSnapshot = null;
+                    cachedSeconds = 0;
+                    cachedPosition = 0;
+                    byteToResolutionRatio = 0;
+                }
+            }
         }
 
         private void _source_SourceEvent(object sender, SourceEventArgs e)
@@ -128,7 +138,7 @@ namespace Audion.Visualization
         #region Resolution Property
 
         public static readonly DependencyProperty ResolutionProperty = DependencyProperty.Register("Resolution", typeof(int),
-            typeof(DynamicWaveform), new UIPropertyMetadata(2048, OnResolutionChanged, OnCoerceResolution));
+            typeof(DynamicWaveform), new UIPropertyMetadata(1024, OnResolutionChanged, OnCoerceResolution));
 
         private static object OnCoerceResolution(DependencyObject o, object value)
         {
@@ -170,6 +180,8 @@ namespace Audion.Visualization
             {
                 Resolution = newValue - 1;
             }
+
+            wavelengthDataSnapshot = null;
         }
 
         /// <summary>
@@ -229,7 +241,7 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="WaveformLength"/></param>
         protected virtual void OnWaveformLengthChanged(double oldValue, double newValue)
         {
-            
+            wavelengthDataSnapshot = null;
         }
 
         /// <summary>
@@ -811,7 +823,7 @@ namespace Audion.Visualization
 
                 var timeChangeSnapshot = Source.GetDataRange((int)start, (int)length, resolution);
 
-                if (timeChangeSnapshot != null)
+                if (timeChangeSnapshot != null/* && timeChangeSnapshot.Length >= resolution*/)
                 {
                     // shift the wavelengthDataSnapshot to include the time change.
                     Array.Copy(wavelengthDataSnapshot, resolution, wavelengthDataSnapshot, 0, wavelengthDataSnapshot.Length - resolution);

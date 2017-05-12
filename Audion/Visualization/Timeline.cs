@@ -62,6 +62,8 @@ namespace Audion.Visualization
             _source = Source;
             _source.SourceEvent += _source_SourceEvent;
             _source.SourcePropertyChangedEvent += _source_SourcePropertyChangedEvent;
+
+            _source_SourceEvent(this, null);
         }
 
         private void _source_SourceEvent(object sender, SourceEventArgs e)
@@ -70,13 +72,19 @@ namespace Audion.Visualization
             {
                 if (Source.Length > TimeSpan.Zero)
                 {
-                    // The source has data. Show various UI.
-                    progressLine.Visibility = Visibility.Visible;
+                    if (progressLine != null)
+                    {
+                        // The source has data. Show various UI.
+                        progressLine.Visibility = Visibility.Visible;
+                    }
                 }
                 else
                 {
-                    // The source does not have data. Hide various UI.
-                    progressLine.Visibility = Visibility.Collapsed;
+                    if (progressLine != null)
+                    { 
+                        // The source does not have data. Hide various UI.
+                        progressLine.Visibility = Visibility.Collapsed;
+                    }
                 }
 
                 UpdateTimeline();
@@ -90,15 +98,20 @@ namespace Audion.Visualization
                 TimeSpan position = (TimeSpan)e.Value;
                 Dispatcher.BeginInvoke((Action)delegate
                 {
-                    var x = 0d;
+                    Position = position;
 
-                    if (_source.Length.TotalMilliseconds != 0)
+                    if (lengthGrid != null && progressLine != null)
                     {
-                        double progressPercent = position.TotalMilliseconds / _source.Length.TotalMilliseconds;
-                        x = progressPercent * lengthGrid.RenderSize.Width;
-                    }
+                        var x = 0d;
 
-                    progressLine.Width = x;
+                        if (_source.Length.TotalMilliseconds != 0)
+                        {
+                            double progressPercent = position.TotalMilliseconds / _source.Length.TotalMilliseconds;
+                            x = progressPercent * lengthGrid.RenderSize.Width;
+                        }
+
+                        progressLine.Width = x;
+                    }
                 });
             }
         }
@@ -220,7 +233,7 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="TickBrush"/></param>
         protected virtual void OnTickBrushChanged(Brush oldValue, Brush newValue)
         {
-
+            UpdateTimeline();
         }
 
         /// <summary>
@@ -280,7 +293,7 @@ namespace Audion.Visualization
         /// <param name="newValue">The new value of <see cref="TimeBrush"/></param>
         protected virtual void OnTimeBrushChanged(Brush oldValue, Brush newValue)
         {
-
+            UpdateTimeline();
         }
 
         /// <summary>
@@ -363,7 +376,7 @@ namespace Audion.Visualization
         #region ProgressBrush Property
 
         public static readonly DependencyProperty ProgressBrushProperty = DependencyProperty.Register("ProgressBrush", typeof(Brush),
-            typeof(Timeline), new UIPropertyMetadata(null, OnProgressBrushChanged, OnCoerceProgressBrush));
+            typeof(Timeline), new UIPropertyMetadata(Brushes.LightBlue, OnProgressBrushChanged, OnCoerceProgressBrush));
 
         private static object OnCoerceProgressBrush(DependencyObject o, object value)
         {
@@ -440,6 +453,8 @@ namespace Audion.Visualization
             lengthGrid = GetTemplateChild("PART_Length") as Grid;
             progressLine = GetTemplateChild("PART_ProgressLine") as Border;
             timelineGrid.CacheMode = new BitmapCache();
+
+            _source_SourceEvent(this, null);
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
@@ -452,7 +467,7 @@ namespace Audion.Visualization
 
         private void UpdateTimeline()
         {
-            if (_source == null || Source.Length == TimeSpan.Zero || lengthGrid.RenderSize.Width < 1 || 
+            if (_source == null || Source.Length == TimeSpan.Zero || lengthGrid == null || lengthGrid.RenderSize.Width < 1 || 
                 lengthGrid.RenderSize.Height < 1)
             {
                 return;

@@ -20,6 +20,13 @@ namespace Audion
         private TimeSpan cachedPosition = TimeSpan.Zero;
         private PlaybackState cachedPlaybackState = PlaybackState.Stopped;
 
+        private Device outputDevice;
+        public Device OutputDevice
+        {
+            get { return outputDevice; }
+            set { outputDevice = value; }
+        }
+
         private BasicSpectrumProvider spectrumProvider;
         public BasicSpectrumProvider SpectrumProvider { get { return spectrumProvider; } }
 
@@ -97,21 +104,65 @@ namespace Audion
             get { return _soundOut == null ? PlaybackState.Stopped : _soundOut.PlaybackState; }
         }
 
+        public bool IsStopped
+        {
+            get { return PlaybackState == PlaybackState.Stopped; }
+        }
+
+        public bool IsPlaying
+        {
+            get { return PlaybackState == PlaybackState.Playing; }
+        }
+
+        public bool Paused
+        {
+            get { return PlaybackState == PlaybackState.Paused; }
+        }
+
+        private bool hasMedia;
+        public bool HasMedia
+        {
+            get { return hasMedia; }
+        }
+
         #region Constructors
 
         public OutputSource()
         {
+            outputDevice = Device.GetDefaultDevice();
+            TimerSetup();
+        }
+
+        public OutputSource(Device device)
+        {
+            outputDevice = device;
             TimerSetup();
         }
 
         public OutputSource(string filename)
         {
+            outputDevice = Device.GetDefaultDevice();
+            Load(filename);
+            TimerSetup();
+        }
+
+        public OutputSource(Device device, string filename)
+        {
+            outputDevice = device;
             Load(filename);
             TimerSetup();
         }
 
         public OutputSource(Uri uri)
         {
+            outputDevice = Device.GetDefaultDevice();
+            Load(uri);
+            TimerSetup();
+        }
+
+        public OutputSource(Device device, Uri uri)
+        {
+            outputDevice = device;
             Load(uri);
             TimerSetup();
         }
@@ -181,10 +232,10 @@ namespace Audion
         {
             if (_waveSource != null)
             {
-                _soundOut = new CSCore.SoundOut.WasapiOut(true, CSCore.CoreAudioAPI.AudioClientShareMode.Exclusive,
+                _soundOut = new CSCore.SoundOut.WasapiOut(true, CSCore.CoreAudioAPI.AudioClientShareMode.Shared,
                     100, System.Threading.ThreadPriority.Highest)
                 {
-                    Device = Device.GetDefaultDevice().ActualDevice
+                    Device = OutputDevice.ActualDevice
                 };
 
                 _soundOut.Initialize(_waveSource.ToSampleSource().ToWaveSource(16));
@@ -322,6 +373,7 @@ namespace Audion
             var ws = CSCore.Codecs.CodecFactory.Instance.GetCodec(_filename);
             _sampleSource = ws.ToSampleSource();
             RaiseSourceEvent(SourceEventType.Loaded);
+            hasMedia = true;
             LoadSoundOut();
         }
 
@@ -347,6 +399,7 @@ namespace Audion
             var ws = CSCore.Codecs.CodecFactory.Instance.GetCodec(_uri);
             _sampleSource = ws.ToSampleSource();
             RaiseSourceEvent(SourceEventType.Loaded);
+            hasMedia = true;
             LoadSoundOut();
         }
 

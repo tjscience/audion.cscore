@@ -61,6 +61,18 @@ namespace Audion.Visualization
             _source = Source;
             _source.SourceEvent += _source_SourceEvent;
             _source.SourcePropertyChangedEvent += _source_SourcePropertyChangedEvent;
+
+            if (_source is OutputSource)
+            {
+                var output = (OutputSource)_source;
+
+                if (output.HasMedia)
+                {
+                    // We need to get data since this source alread has media and 
+                    // data may not be loaded.
+                    Source.GetData(Resolution);
+                }
+            }
         }
 
         private void _source_SourceEvent(object sender, SourceEventArgs e)
@@ -103,7 +115,7 @@ namespace Audion.Visualization
         #region Resolution Property
 
         public static readonly DependencyProperty ResolutionProperty = DependencyProperty.Register("Resolution", typeof(int),
-            typeof(Waveform), new UIPropertyMetadata(2048, OnResolutionChanged, OnCoerceResolution));
+            typeof(Waveform), new UIPropertyMetadata(1024, OnResolutionChanged, OnCoerceResolution));
 
         private static object OnCoerceResolution(DependencyObject o, object value)
         {
@@ -144,6 +156,18 @@ namespace Audion.Visualization
             if (newValue % 2 != 0)
             {
                 Resolution = newValue - 1;
+            }
+
+            if (_source is OutputSource)
+            {
+                var output = (OutputSource)_source;
+
+                if (output.HasMedia)
+                {
+                    // We need to get data since this source alread has media and 
+                    // data may not be loaded.
+                    Source.GetData(Resolution);
+                }
             }
         }
 
