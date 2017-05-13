@@ -111,4 +111,9 @@ var _source = new Source();
 spectrum.Source = _source;
 ```
 
+### Sample Application
+
+(This is a work in progress)
+
+![audion](https://cloud.githubusercontent.com/assets/3706870/26027746/299efefa-37e1-11e7-9fd6-d9429db91132.png)
     
