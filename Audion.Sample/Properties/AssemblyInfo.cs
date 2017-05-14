@@ -54,7 +54,3 @@ using System.Windows.Markup;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.8.2")]
 [assembly: AssemblyFileVersion("0.8.2")]
-
-[assembly: XmlnsPrefix("http://schemas.fontawesome.io/icons/", "fa")]
-[assembly: XmlnsDefinition("http://schemas.fontawesome.io/icons/", "FontAwesome.WPF")]
-[assembly: XmlnsDefinition("http://schemas.fontawesome.io/icons/", "FontAwesome.WPF.Converters")]
