@@ -46,7 +46,7 @@ source.Play();
     
 ### Waveform
 
-![waveform](https://cloud.githubusercontent.com/assets/3706870/22753981/f62a8342-ee0b-11e6-8a75-adb744b969ed.png)
+![waveform](https://cloud.githubusercontent.com/assets/3706870/26027702/8b2c5baa-37e0-11e7-9043-c8a3653253d8.png)
 
 #### XAML
 
@@ -68,7 +68,7 @@ waveform.Source = _source;
 
 ### Timeline
 
-![timeline](https://cloud.githubusercontent.com/assets/3706870/22754270/03c1ad68-ee0d-11e6-80bd-edeb34a8ab9e.png)
+![timeline](https://cloud.githubusercontent.com/assets/3706870/26027703/8b2dde6c-37e0-11e7-9718-04dd5860a057.png)
 
 #### XAML
 
@@ -92,7 +92,7 @@ timeline.Source = _source;
     
 ### Spectrum Analyzer
 
-![spectrum](https://cloud.githubusercontent.com/assets/3706870/22754485/abd235fe-ee0d-11e6-848f-c4b5500c9c52.png)
+![spectrum](https://cloud.githubusercontent.com/assets/3706870/26027701/8b2b8b08-37e0-11e7-8aed-68d97925edd0.png)
 
 #### XAML
 
@@ -111,4 +111,9 @@ var _source = new Source();
 spectrum.Source = _source;
 ```
 
+### Sample Application
+
+(This is a work in progress)
+
+![audion](https://cloud.githubusercontent.com/assets/3706870/26027746/299efefa-37e1-11e7-9fd6-d9429db91132.png)
     
