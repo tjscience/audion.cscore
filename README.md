@@ -24,10 +24,10 @@ Audion is powered by the awesome **[CSCore](https://github.com/filoe/cscore)** .
 
 ### Source
 
-The Source class in audion makes it simple to load media and start playing with it. Every visualization simply subscribes to a Source. It is common to have one Source instance powering multiple different visualizations. Here is a simple example of loading a media file and playing it.
+The Source classes in audion makes it simple to load media and start playing with it. Every visualization simply subscribes to a Source. There are two versions, OutputSource to play media out of a device and InputSource to record media from a device. It is common to have one Source instance powering multiple different visualizations. Here is a simple example of loading a media file and playing it.
 
 ```C#
-var source = new Source();
+var output = new OutputSource();
     
 // Open a file dialog to choose a media file
 OpenFileDialog openFileDialog = new OpenFileDialog
@@ -38,10 +38,10 @@ OpenFileDialog openFileDialog = new OpenFileDialog
 // Load the media file into the source
 if (openFileDialog.ShowDialog() == true)
 {
-    source.Load(openFileDialog.FileName);
+    output.Load(openFileDialog.FileName);
 }
     
-source.Play();
+output.Play();
 ```    
     
 ### Waveform
@@ -62,8 +62,8 @@ source.Play();
 #### Code
 
 ```C#
-var _source = new Source();
-waveform.Source = _source;
+var output = new OutputSource();
+waveform.Source = output;
 ```
 
 ### Timeline
@@ -86,8 +86,8 @@ waveform.Source = _source;
 #### Code
 
 ```C#
-var _source = new Source();
-timeline.Source = _source;
+var output = new OutputSouce();
+timeline.Source = output;
 ```
     
 ### Spectrum Analyzer
@@ -107,8 +107,8 @@ timeline.Source = _source;
 #### Code
 
 ```C#
-var _source = new Source();
-spectrum.Source = _source;
+var output = new OutputSource();
+spectrum.Source = output;
 ```
 
 ### Sample Application
