@@ -49,8 +49,11 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="BasicSpectrumProvider.cs" />
+    <Compile Include="ClockType.cs" />
+    <Compile Include="Converters\StringToVisibilityValueConverter.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceType.cs" />
+    <Compile Include="Extensions\TimeSpanExtensions.cs" />
     <Compile Include="RecordingState.cs" />
     <Compile Include="SourceEventArgs.cs" />
     <Compile Include="SourceEventType.cs" />
@@ -63,6 +66,7 @@
     <Compile Include="SourcePropertyChangedEventArgs.cs" />
     <Compile Include="Visualization\SpectrumAnalyzer.cs" />
     <Compile Include="Visualization\DynamicWaveform.cs" />
+    <Compile Include="Visualization\Timeclock.cs" />
     <Compile Include="Visualization\Waveform.cs" />
     <Compile Include="Visualization\Timeline.cs" />
   </ItemGroup>

@@ -22,6 +22,7 @@ namespace Audion.Sample
         private InputDynamicWaveform inputDynamicWaveform;
         private OutputTimeline outputTimeline;
         private OutputSpectrumAnalyzer outputSpectrumAnalyzer;
+        private OutputTimeclock outputTimeclock;
 
         private ObservableCollection<Device> inputDevices = new ObservableCollection<Device>(
             Device.GetDevices());
@@ -190,6 +191,13 @@ namespace Audion.Sample
                     outputSpectrumAnalyzer = new OutputSpectrumAnalyzer(output);
 
                 Display.Content = outputSpectrumAnalyzer;
+            }
+            else if (sample == "output-timeclock")
+            {
+                if (outputTimeclock == null)
+                    outputTimeclock = new OutputTimeclock(output);
+
+                Display.Content = outputTimeclock;
             }
         }
 

@@ -71,6 +71,9 @@
     <Compile Include="Samples\OutputSpectrumAnalyzer.xaml.cs">
       <DependentUpon>OutputSpectrumAnalyzer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Samples\OutputTimeclock.xaml.cs">
+      <DependentUpon>OutputTimeclock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Samples\OutputTimeline.xaml.cs">
       <DependentUpon>OutputTimeline.xaml</DependentUpon>
     </Compile>
@@ -99,6 +102,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Samples\OutputSpectrumAnalyzer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Samples\OutputTimeclock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

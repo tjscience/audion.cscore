@@ -236,13 +236,99 @@
             </Grid>
         </DataTemplate>
 
+        <DataTemplate x:Key="TimeclockDataTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <GridSplitter ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Width="5" VerticalAlignment="Stretch"
+                              Grid.Column="1" Grid.Row="1" Grid.RowSpan="100" BorderBrush="#FF555555" Background="Transparent"
+                              BorderThickness="1,0,0,0"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="ClockType" />
+                <ComboBox Grid.Row="1" Grid.Column="2" Loaded="ClockTypeComboBox_Loaded">
+                    <ComboBoxItem PreviewMouseLeftButtonDown="ClockTypeChanged" Tag="{Binding}">TimeElapsed</ComboBoxItem>
+                    <ComboBoxItem PreviewMouseLeftButtonDown="ClockTypeChanged" Tag="{Binding}">TimeRemaining</ComboBoxItem>
+                </ComboBox>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="LabelFont" />
+                <ComboBox Grid.Row="3" Grid.Column="2" Loaded="LabelFontComboBox_Loaded" 
+                          ItemsSource="{Binding Source={x:Static Fonts.SystemFontFamilies}}"
+                          Name="LabelFont">
+                    <ComboBox.ItemContainerStyle>
+                        <Style>
+                            <EventSetter Event="ComboBoxItem.PreviewMouseLeftButtonDown" Handler="FontChanged" />
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <Label Grid.Row="5" Grid.Column="0" Content="TimeFont" />
+                <ComboBox Grid.Row="5" Grid.Column="2" Loaded="TimeFontComboBox_Loaded" 
+                          ItemsSource="{Binding Source={x:Static Fonts.SystemFontFamilies}}"
+                          Name="TimeFont">
+                    <ComboBox.ItemContainerStyle>
+                        <Style>
+                            <EventSetter Event="ComboBoxItem.PreviewMouseLeftButtonDown" Handler="FontChanged" />
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
+
+                <Label Grid.Row="7" Grid.Column="0" Content="FontSize" />
+                <TextBox Grid.Row="7" Grid.Column="2" Text="{Binding FontSize}" />
+
+                <Label Grid.Row="9" Grid.Column="0" Content="CornerRadius" />
+                <TextBox Grid.Row="9" Grid.Column="2" Text="{Binding CornerRadius}" />
+                
+                <Label Grid.Row="11" Grid.Column="0" Content="LabelForeground" />
+                <TextBox Grid.Row="11" Grid.Column="2" Text="{Binding LabelForeground}" />
+
+                <Label Grid.Row="13" Grid.Column="0" Content="TimeForeground" />
+                <TextBox Grid.Row="13" Grid.Column="2" Text="{Binding TimeForeground}" />
+
+                <Label Grid.Row="15" Grid.Column="0" Content="Label" />
+                <TextBox Grid.Row="15" Grid.Column="2" Text="{Binding Label}" />
+
+                <Label Grid.Row="17" Grid.Column="0" Content="Background" />
+                <TextBox Grid.Row="17" Grid.Column="2" Text="{Binding Background}" />
+                
+                <Label Grid.Row="19" Grid.Column="0" Content="TimeFormat" />
+                <TextBox Grid.Row="19" Grid.Column="2" Text="{Binding TimeFormat}" />
+
+            </Grid>
+        </DataTemplate>
 
         <local:PropertyGridTemplateSelector x:Key="PropertyGridTemplateSelector"
                                             DefaultDataTemplate="{StaticResource DefaultDataTemplate}"
                                             WaveformDataTemplate="{StaticResource WaveformDataTemplate}"
                                             DynamicWaveformDataTemplate="{StaticResource DynamicWaveformDataTemplate}"
                                             OutputTimelineDataTemplate="{StaticResource OutputTimelineDataTemplate}"
-                                            OutputSpectrumAnalyzerDataTemplate="{StaticResource OutputSpectrumAnalyzerTemplate}" />
+                                            OutputSpectrumAnalyzerDataTemplate="{StaticResource OutputSpectrumAnalyzerTemplate}"
+                                            TimeclockDataTemplate="{StaticResource TimeclockDataTemplate}" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>

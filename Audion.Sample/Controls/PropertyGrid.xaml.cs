@@ -1,5 +1,8 @@
-﻿using System.ComponentModel;
+﻿using Audion.Visualization;
+using System.ComponentModel;
 using System.Windows.Controls;
+using System.Linq;
+using System.Windows.Media;
 
 namespace Audion.Sample.Controls
 {
@@ -52,5 +55,53 @@ namespace Audion.Sample.Controls
         }
 
         #endregion
+
+        private void ClockTypeChanged(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var cbi = (ComboBoxItem)sender;
+
+            var timeclock = cbi.Tag as Timeclock;
+            var clockType = (string)cbi.Content;
+
+            timeclock.ClockType = (ClockType)System.Enum.Parse(typeof(ClockType), clockType);
+            (cbi.Parent as ComboBox).Text = clockType;
+        }
+
+        private void ClockTypeComboBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ((ComboBox)sender).Text = "TimeElapsed";
+        }
+
+        private void LabelFontComboBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ((ComboBox)sender).Text = "Segoe UI";
+        }
+
+        private void TimeFontComboBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ((ComboBox)sender).Text = "Ebrima";
+        }
+
+        private void FontChanged(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var cbi = (ComboBoxItem)sender;
+
+            var font = cbi.DataContext as FontFamily;
+            var parent = ItemsControl.ItemsControlFromItemContainer(cbi) as ComboBox;
+
+            if (parent.Name == "LabelFont")
+            {
+                var timeclock = parent.DataContext as Timeclock;
+                timeclock.LabelFont = font;
+                parent.Text = font.Source;
+            }
+            else if (parent.Name == "TimeFont")
+            {
+                var timeclock = parent.DataContext as Timeclock;
+                timeclock.TimeFont = font;
+                parent.Text = font.Source;
+            }
+
+        }
     }
 }

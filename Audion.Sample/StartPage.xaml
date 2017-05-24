@@ -79,6 +79,7 @@
             <Button Content="Output Dynamic Waveform" Click="OpenSample" Tag="output-dynamic-waveform" Padding="5,3,5,3" />
             <Button Content="Output Timeline" Click="OpenSample" Tag="output-timeline" Padding="5,3,5,3" />
             <Button Content="Output Spectrum Analyzer" Click="OpenSample" Tag="output-spectrum-analyzer" Padding="5,3,5,3" />
+            <Button Content="Output Timeclock" Click="OpenSample" Tag="output-timeclock" Padding="5,3,5,3" />
         </StackPanel>
         <GridSplitter Grid.Row="2" Grid.Column="1" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Width="10"
                       BorderBrush="#FF555555" Background="Transparent" BorderThickness="1,0,0,0"

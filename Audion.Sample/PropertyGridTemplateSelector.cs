@@ -11,6 +11,8 @@ namespace Audion.Sample
         public DataTemplate DynamicWaveformDataTemplate { get; set; }
         public DataTemplate OutputTimelineDataTemplate { get; set; }
         public DataTemplate OutputSpectrumAnalyzerDataTemplate { get; set; }
+        public DataTemplate OutputTimeclockDataTemplate { get; set; }
+        public DataTemplate TimeclockDataTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -22,6 +24,8 @@ namespace Audion.Sample
                 return OutputTimelineDataTemplate;
             if (item is SpectrumAnalyzer)
                 return OutputSpectrumAnalyzerDataTemplate;
+            if (item is Timeclock)
+                return TimeclockDataTemplate;
 
             return DefaultDataTemplate;
         }
